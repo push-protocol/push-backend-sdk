@@ -1,6 +1,6 @@
 {
   "name": "@dumebi/epns-sdk",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "SDK for sending notifications on EPNS",
   "main": "index.js",
   "scripts": {
