@@ -1,0 +1,18 @@
+{
+  "name": "@dumebi/epns-sdk",
+  "version": "1.0.0",
+  "description": "SDK for sending notifications on EPNS",
+  "main": "index.js",
+  "scripts": {
+    "git": "func() { git add . && git commit -m \"$1\" && git push origin HEAD; }; func",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ethers": "^5.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^15.6.0"
+  }
+}
