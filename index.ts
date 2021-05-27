@@ -2,15 +2,16 @@
 import epnsNotify from './epnsNotifyHelper';
 import config from './config';
 import { ethers } from 'ethers';
+import logger from './logger';
 
-function getEPNSInteractableContract(channelKey: String) {
+function getEPNSInteractableContract(channelKey: string, etherscan: string, alchemy: string, infura: InfuraSettings) {
     // Get Contract
     return epnsNotify.getInteractableContracts(
         config.web3RopstenNetwork,                                              // Network for which the interactable contract is req
         {                                                                       // API Keys
-            etherscanAPI: config.etherscanAPI,
-            infuraAPI: config.infuraAPI,
-            alchemyAPI: config.alchemyAPI
+            etherscanAPI: etherscan,
+            infuraAPI: infura,
+            alchemyAPI: alchemy
         },
         channelKey,            // Private Key of the Wallet sending Notification
         config.deployedContract,                                                // The contract address which is going to be used
@@ -18,19 +19,38 @@ function getEPNSInteractableContract(channelKey: String) {
     );
 }
 
+export interface InfuraSettings {
+    projectID: string
+    projectSecret: string
+}
+
+export interface NetWorkSettings {
+    alchemy?: string,
+    infura?: InfuraSettings,
+    etherscan?: string
+}
+
 export default class NotificationHelper {
     private channelKey;
     private web3network;
     private epns;
+    private infura: InfuraSettings
+    private alchemy;
+    private etherscan;
     /**
      * 
      * @param web3network Network
      * @param channelKey Channel private key
      */
-    constructor(web3network: String, channelKey: String) {
+    constructor(web3network: string, channelKey: string, network: NetWorkSettings) {
         this.channelKey = channelKey;
         this.web3network = web3network;
-        this.epns = getEPNSInteractableContract(channelKey);
+        if (network.alchemy) this.alchemy = network.alchemy
+        if (network.infura) this.infura = network.infura
+        if (!this.alchemy && !this.infura) {
+            throw new Error("Initialize using an alchemy key or Infura parameters")
+        }
+        this.epns = getEPNSInteractableContract(channelKey, this.etherscan, this.alchemy, this.infura);
     }
 
     public advanced = epnsNotify;
@@ -76,8 +96,8 @@ export default class NotificationHelper {
      * @param payloadTitle Internal Title
      * @param payloadMsg Internal Message
      */
-    public async sendNotification (user: string, title: string, message: string, payloadTitle: string, payloadMsg: string) {
-        const hash = await this.getPayloadHash(user, title, message, payloadTitle, payloadMsg)
+    async sendNotification (user: string, title: string, message: string, payloadTitle: string, payloadMsg: string, simulate: boolean | Object) {
+        const hash = await this.getPayloadHash(user, title, message, payloadTitle, payloadMsg, simulate)
         // Send notification
         const ipfshash = hash.ipfshash;
         const payloadType = hash.payloadType;
@@ -92,8 +112,8 @@ export default class NotificationHelper {
             storageType,                                                    // Notificattion Storage Type
             ipfshash,                                                       // Notification Storage Pointer
             txConfirmWait,                                                  // Should wait for transaction confirmation
-            null,
-            null                                                            // Logger instance (or console.log) to pass
+            logger,                                                            // Logger instance (or console.log) to pass
+            simulate
         )
         return tx
     }
@@ -108,9 +128,9 @@ export default class NotificationHelper {
      * @param payloadMsg Internal Message 
      * @returns 
      */
-    async getPayloadHash (user: string, title: string, message: string, payloadTitle: string, payloadMsg: string) {
+    private async getPayloadHash (user: string, title: string, message: string, payloadTitle: string, payloadMsg: string, simulate: boolean | Object) {
         const payload = await this.getLiquidityPayload(title, message, payloadTitle, payloadMsg)
-        const ipfshash = await epnsNotify.uploadToIPFS(payload, null, null)
+        const ipfshash = await epnsNotify.uploadToIPFS(payload, logger, simulate)
         // Sign the transaction and send it to chain
         return {
             success: true,
@@ -129,7 +149,7 @@ export default class NotificationHelper {
      * @param payloadMsg Internal Message
      * @returns 
      */
-    async getLiquidityPayload (title: string, message: string, payloadTitle: string, payloadMsg: string) {
+    private async getLiquidityPayload (title: string, message: string, payloadTitle: string, payloadMsg: string) {
         return epnsNotify.preparePayload(
             null,                                                               // Recipient Address | Useful for encryption
             3,                                                                  // Type of Notification

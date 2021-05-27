@@ -1,12 +1,12 @@
 {
   "name": "@dumebi/epns-sdk",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "SDK for sending notifications on EPNS",
   "main": "index.js",
   "scripts": {
     "git": "func() { git add . && git commit -m \"$1\" && git push origin HEAD; }; func",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "publish": "npm publish --access public"
+    "deploy": "npm publish --access public"
   },
   "author": "",
   "license": "ISC",
