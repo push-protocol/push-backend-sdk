@@ -4,6 +4,20 @@ import config from './config';
 import { ethers } from 'ethers';
 import logger from './logger';
 
+function getEPNSInteractableContract(channelKey: string, etherscan: string, alchemy: string, infura: InfuraSettings) {
+    // Get Contract
+    return epnsNotify.getInteractableContracts(
+        config.web3RopstenNetwork,                                              // Network for which the interactable contract is req
+        {                                                                       // API Keys
+            etherscanAPI: etherscan,
+            infuraAPI: infura,
+            alchemyAPI: alchemy
+        },
+        channelKey,            // Private Key of the Wallet sending Notification
+        config.deployedContract,                                                // The contract address which is going to be used
+        config.deployedContractABI                                              // The contract abi which is going to be useds
+    );
+}
 
 export interface InfuraSettings {
     projectID: string
@@ -16,7 +30,7 @@ export interface NetWorkSettings {
     etherscan?: string
 }
 
-export class NotificationHelper {
+export default class NotificationHelper {
     private channelKey;
     private web3network;
     private epns;
@@ -36,12 +50,10 @@ export class NotificationHelper {
         if (!this.alchemy && !this.infura) {
             throw new Error("Initialize using an alchemy key or Infura parameters")
         }
-        this.epns = this.getEPNSInteractableContract(channelKey, this.etherscan, this.alchemy, this.infura);
+        this.epns = getEPNSInteractableContract(channelKey, this.etherscan, this.alchemy, this.infura);
     }
 
     public advanced = epnsNotify;
-
-
 
     /**
      * Get Subscribed Users
@@ -84,7 +96,7 @@ export class NotificationHelper {
      * @param payloadTitle Internal Title
      * @param payloadMsg Internal Message
      */
-    async sendNotification (user: string, title: string, message: string, payloadTitle: string, payloadMsg: string, simulate: boolean | Object) {
+    public async sendNotification (user: string, title: string, message: string, payloadTitle: string, payloadMsg: string, simulate: boolean | Object) {
         const hash = await this.getPayloadHash(user, title, message, payloadTitle, payloadMsg, simulate)
         // Send notification
         const ipfshash = hash.ipfshash;
@@ -105,21 +117,6 @@ export class NotificationHelper {
         )
         return tx
     }
-
-    private getEPNSInteractableContract(channelKey: string, etherscan: string, alchemy: string, infura: InfuraSettings) {
-    // Get Contract
-    return epnsNotify.getInteractableContracts(
-        config.web3RopstenNetwork,                                              // Network for which the interactable contract is req
-        {                                                                       // API Keys
-            etherscanAPI: etherscan,
-            infuraAPI: infura,
-            alchemyAPI: alchemy
-        },
-        channelKey,            // Private Key of the Wallet sending Notification
-        config.deployedContract,                                                // The contract address which is going to be used
-        config.deployedContractABI                                              // The contract abi which is going to be useds
-    );
-}
 
     /**
      * Get Payload Hash
