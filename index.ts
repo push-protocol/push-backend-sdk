@@ -16,7 +16,7 @@ export interface NetWorkSettings {
     etherscan?: string
 }
 
-export default class NotificationHelper {
+export class NotificationHelper {
     private channelKey;
     private web3network;
     private epns;
