@@ -1,6 +1,6 @@
 {
   "name": "@epnsproject/backend-sdk",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "SDK for sending notifications on EPNS",
   "main": "index.js",
   "scripts": {
