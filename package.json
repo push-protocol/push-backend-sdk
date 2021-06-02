@@ -1,6 +1,6 @@
 {
-  "name": "@dumebi/epns-sdk",
-  "version": "1.2.0",
+  "name": "@epnsproject/backend-sdk",
+  "version": "1.0.0",
   "description": "SDK for sending notifications on EPNS",
   "main": "index.js",
   "scripts": {
@@ -8,6 +8,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "deploy": "npm publish --access public"
   },
+  "type": "module",
   "author": "",
   "license": "ISC",
   "dependencies": {
