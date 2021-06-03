@@ -9,8 +9,7 @@
     "build": "tsc",
     "build:check": "tsc --noEmit",
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
-    "lint": "tslint -p tsconfig.json",
-    "deploy": "npm publish --access public"
+    "lint": "tslint -p tsconfig.json"
   },
   "repository": {
     "type": "git",
@@ -19,6 +18,9 @@
   "files": [
     "lib"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
