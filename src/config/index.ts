@@ -35,5 +35,5 @@ export default {
    * EPNS Related
    */
   deployedContract: process.env.EPNS_DEPLOYED_CONTRACT,
-  deployedContractABI: require('./epns_contract.json')
+  deployedContractABI: require('./epns_contract.json'),
 };

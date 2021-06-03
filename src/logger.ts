@@ -1,5 +1,5 @@
 import winston from 'winston';
-require ('winston-daily-rotate-file');
+require('winston-daily-rotate-file');
 const moment = require('moment'); // time library
 
 const customLevels = {
@@ -21,7 +21,7 @@ const customLevels = {
     input: 'inverse bold',
     saved: 'italic white',
     debug: 'yellow',
-  }
+  },
 };
 
 var options = {
@@ -30,8 +30,8 @@ var options = {
     filename: `${__dirname}/../../logs/app.log`,
     handleExceptions: true,
     json: true,
-    maxSize: "5m", // 5MB
-    maxFiles: "5d",
+    maxSize: '5m', // 5MB
+    maxFiles: '5d',
     // colorize: true,
   },
 };
@@ -61,34 +61,34 @@ const formatter = winston.format.combine(
   winston.format.colorize({
     all: true,
   }),
-)
+);
 
-var transport = new (winston.transports.DailyRotateFile)(options.file);
-transport.on('rotate', function(oldFilename, newFilename) {
+var transport = new winston.transports.DailyRotateFile(options.file);
+transport.on('rotate', function (oldFilename, newFilename) {
   // do something fun
-  console.log("login rotated from: %o | %o", oldFilename, newFilename)
+  console.log('login rotated from: %o | %o', oldFilename, newFilename);
 });
 
 const transports = [];
 transports.push(
   transport,
   new winston.transports.Console({
-    format: formatter
+    format: formatter,
   }),
-)
+);
 
 const LoggerInstance = winston.createLogger({
   level: 'debug',
   levels: customLevels.levels,
   format: winston.format.combine(
     winston.format.timestamp({
-      format: 'YYYY-MM-DD HH:mm:ss'
+      format: 'YYYY-MM-DD HH:mm:ss',
     }),
     winston.format.errors({ stack: true }),
     winston.format.splat(),
-    winston.format.json()
+    winston.format.json(),
   ),
-  transports
+  transports,
 });
 
 winston.addColors(customLevels.colors);
