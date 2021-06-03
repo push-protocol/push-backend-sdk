@@ -2,11 +2,10 @@
   "name": "@epnsproject/backend-sdk",
   "version": "1.0.6",
   "description": "SDK for sending notifications on EPNS",
-  "main": "index.js",
   "scripts": {
     "git": "func() { git add . && git commit -m \"$1\" && git push origin HEAD; }; func",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc",
+    "build": "tsc && cp ./src/config/epns_contract.json ./lib/config/epns_contract.json ",
     "build:check": "tsc --noEmit",
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
     "lint": "tslint -p tsconfig.json"
@@ -21,6 +20,9 @@
   "publishConfig": {
     "access": "public"
   },
+  "types": "./lib/index.d.ts",
+  "main": "./lib/index.js",
+  "module": "./lib/index.js",
   "author": "",
   "license": "ISC",
   "dependencies": {
