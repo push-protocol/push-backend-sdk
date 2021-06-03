@@ -1,35 +1,33 @@
 {
   "name": "@epnsproject/backend-sdk",
-  "version": "1.0.5",
+  "version": "1.0.4",
   "description": "SDK for sending notifications on EPNS",
   "main": "index.js",
   "scripts": {
     "git": "func() { git add . && git commit -m \"$1\" && git push origin HEAD; }; func",
     "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "build:check": "tsc --noEmit",
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
     "lint": "tslint -p tsconfig.json",
-    "deploy": "npm publish --access public",
-    "prepare": "npm run build",
-    "prepublishOnly": "npm run lint",
-    "preversion": "npm run lint",
-    "version": "npm run format && git add -A src",
-    "postversion": "git push && git push --tags"
+    "deploy": "npm publish --access public"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ethereum-push-notification-service/epns-backendsdk-staging"
   },
   "files": [
-    "lib/**/*"
+    "lib"
   ],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "ethers": "^5.2.0",
-    "winston": "^3.3.3"
+    "winston": "^3.3.3",
+    "winston-daily-rotate-file": "^4.5.5"
   },
   "devDependencies": {
-    "@types/node": "^15.6.0",
+    "@types/node": "^15.9.0",
     "prettier": "^2.3.0",
     "ts-node": "^10.0.0",
     "tslint": "^6.1.3",

@@ -2,7 +2,7 @@ import { ethers } from 'ethers';
 
 export default {
   // Upload to IPFS
-  uploadToIPFS: async (payload, logger, simulate) => {
+  uploadToIPFS: async (payload: any, logger: any, simulate: any) => {
     const enableLogs = 0;
 
     return new Promise(async (resolve, reject) => {
@@ -29,18 +29,18 @@ export default {
       const ipfs = require('nano-ipfs-store').at('https://ipfs.infura.io:5001');
       ipfs
         .add(jsonizedPayload)
-        .then((ipfshash) => {
+        .then((ipfshash: any) => {
           if (enableLogs) logger.info('Success --> uploadToIPFS(): ', ipfshash);
           resolve(ipfshash);
         })
-        .catch((err) => {
+        .catch((err: Error) => {
           if (enableLogs) logger.error('!!!Error --> uploadToIPFS(): ', err);
           reject(err);
         });
     });
   },
   // Get Interactable Contracts
-  getInteractableContracts: (network, apiKeys, walletPK, deployedContract, deployedContractABI) => {
+  getInteractableContracts: (network: any, apiKeys: any, walletPK: any, deployedContract: any, deployedContractABI: any) => {
     const enableLogs = 0;
 
     const provider = ethers.getDefaultProvider(network, {
@@ -68,14 +68,14 @@ export default {
   },
   // Send Notification to EPNS Contract
   sendNotification: async (
-    signingContract,
-    recipientAddr,
-    notificationType,
-    notificationStorageType,
-    notificationStoragePointer,
-    waitForTx,
-    logger,
-    simulate,
+    signingContract: any,
+    recipientAddr: any,
+    notificationType: any,
+    notificationStorageType: any,
+    notificationStoragePointer: any,
+    waitForTx: any,
+    logger: any,
+    simulate: any,
   ) => {
     const enableLogs = 0;
 
@@ -121,7 +121,7 @@ export default {
       const txPromise = signingContract.sendNotification(recipientAddr, identityBytes);
 
       txPromise
-        .then(async function (tx) {
+        .then(async function (tx: any) {
           if (enableLogs) logger.info('Transaction sent: %o', tx);
 
           if (waitForTx) {
@@ -132,7 +132,7 @@ export default {
 
           resolve(tx);
         })
-        .catch((err) => {
+        .catch((err: Error) => {
           if (enableLogs) logger.error('Unable to complete transaction, error: %o', err);
 
           reject(`Unable to complete transaction, error: ${err}`);
@@ -140,7 +140,7 @@ export default {
     });
   },
   // Prepare Payload for Notification
-  preparePayload: async (recipientAddr, payloadType, title, body, payloadTitle, payloadMsg, payloadCTA, payloadImg) => {
+  preparePayload: async (recipientAddr: any, payloadType: any, title: any, body: any, payloadTitle: any, payloadMsg: any, payloadCTA: any, payloadImg: any) => {
     const enableLogs = 0;
 
     return new Promise((resolve, reject) => {

@@ -3,7 +3,7 @@ import config from './config';
 import { ethers } from 'ethers';
 import logger from './logger';
 
-function getEPNSInteractableContract(channelKey: string, etherscan: string, alchemy: string, infura: InfuraSettings) {
+function getEPNSInteractableContract(channelKey: string, etherscan: string | undefined, alchemy: string | undefined, infura: InfuraSettings | undefined) {
   // Get Contract
   return epnsNotify.getInteractableContracts(
     config.web3RopstenNetwork, // Network for which the interactable contract is req
@@ -68,7 +68,7 @@ export default class NotificationHelper {
 
     //Function to get all the addresses in the channel
     const eventLog = await this.epns.contract.queryFilter(filter, startBlock);
-    const users = eventLog.map((log) => log.args.user);
+    const users = eventLog.map((log: any) => log.args.user);
     return users;
   }
 
@@ -144,7 +144,7 @@ export default class NotificationHelper {
     payloadMsg: string,
     simulate: boolean | Object,
   ) {
-    const payload = await this.getLiquidityPayload(title, message, payloadTitle, payloadMsg);
+    const payload: any = await this.getLiquidityPayload(title, message, payloadTitle, payloadMsg);
     const ipfshash = await epnsNotify.uploadToIPFS(payload, logger, simulate);
     // Sign the transaction and send it to chain
     return {
