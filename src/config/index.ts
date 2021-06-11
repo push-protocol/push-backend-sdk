@@ -32,6 +32,12 @@ export default {
   web3KovanSocket: process.env.KOVAN_WEB3_SOCKET,
 
   /**
+   * IPFS related
+   */
+   ipfsLocal: process.env.IPFS_LOCAL_ENDPOINT,
+   ipfsInfura: process.env.IPFS_INFURA_ENDPOINT,
+
+  /**
    * EPNS Related
    */
   deployedContract: process.env.EPNS_DEPLOYED_CONTRACT,

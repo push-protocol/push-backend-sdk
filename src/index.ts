@@ -144,8 +144,8 @@ export default class NotificationHelper {
     payloadMsg: string,
     simulate: boolean | Object,
   ) {
-    const payload: any = await this.getLiquidityPayload(title, message, payloadTitle, payloadMsg);
-    const ipfshash = await epnsNotify.uploadToIPFS(payload, logger, simulate);
+    const payload: any = await this.getPayload(title, message, payloadTitle, payloadMsg);
+    const ipfshash = await epnsNotify.uploadToIPFS(payload, logger, null, simulate);
     // Sign the transaction and send it to chain
     return {
       success: true,
@@ -164,7 +164,7 @@ export default class NotificationHelper {
    * @param payloadMsg Internal Message
    * @returns
    */
-  private async getLiquidityPayload(title: string, message: string, payloadTitle: string, payloadMsg: string) {
+  private async getPayload(title: string, message: string, payloadTitle: string, payloadMsg: string) {
     return epnsNotify.preparePayload(
       null, // Recipient Address | Useful for encryption
       3, // Type of Notification
