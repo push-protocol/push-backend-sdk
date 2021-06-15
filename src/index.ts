@@ -1,12 +1,11 @@
 import epnsNotify from './epnsNotifyHelper';
-import config from './config';
 import { ethers } from 'ethers';
 import logger from './logger';
 
-function getEPNSInteractableContract(channelKey: string, etherscan: string | undefined, alchemy: string | undefined, infura: InfuraSettings | undefined) {
+function getEPNSInteractableContract(epnsSettings: EPNSSettings, channelKey: string, etherscan: string | undefined, alchemy: string | undefined, infura: InfuraSettings | undefined) {
   // Get Contract
   return epnsNotify.getInteractableContracts(
-    config.web3RopstenNetwork, // Network for which the interactable contract is req
+    epnsSettings.network, // Network for which the interactable contract is req
     {
       // API Keys
       etherscanAPI: etherscan,
@@ -14,8 +13,8 @@ function getEPNSInteractableContract(channelKey: string, etherscan: string | und
       alchemyAPI: alchemy,
     },
     channelKey, // Private Key of the Wallet sending Notification
-    config.deployedContract, // The contract address which is going to be used
-    config.deployedContractABI, // The contract abi which is going to be useds
+    epnsSettings.contractAddress, // The contract address which is going to be used
+    epnsSettings.contractABI, // The contract abi which is going to be useds
   );
 }
 
@@ -30,9 +29,17 @@ export interface NetWorkSettings {
   etherscan?: string;
 }
 
+export interface EPNSSettings {
+  network: string;
+  contractAddress: string;
+  contractABI: string;
+}
+
 export default class NotificationHelper {
   private channelKey: string;
   private web3network: string;
+  private network: NetWorkSettings;
+  private epnsSettings: EPNSSettings;
   private epns;
   // private infura: InfuraSettings
   // private alchemy: string;
@@ -41,16 +48,19 @@ export default class NotificationHelper {
    *
    * @param web3network Network
    * @param channelKey Channel private key
+   * @param epnsSettings Network of epns contract
    */
-  constructor(web3network: string, channelKey: string, network: NetWorkSettings) {
+  constructor(web3network: string, channelKey: string, network: NetWorkSettings, epnsSettings: EPNSSettings) {
     this.channelKey = channelKey;
     this.web3network = web3network;
+    this.epnsSettings = epnsSettings;
+    this.network = network;
     // if (network.alchemy) this.alchemy = network.alchemy
     // if (network.infura) this.infura = network.infura
     if (!network.alchemy && !network.infura) {
       throw new Error('Initialize using an alchemy key or Infura parameters');
     }
-    this.epns = getEPNSInteractableContract(channelKey, network.etherscan, network.alchemy, network.infura);
+    this.epns = getEPNSInteractableContract(epnsSettings, channelKey, network.etherscan, network.alchemy, network.infura);
   }
 
   public advanced = epnsNotify;
@@ -77,9 +87,9 @@ export default class NotificationHelper {
       this.web3network, // Network for which the interactable contract is req
       {
         // API Keys
-        etherscanAPI: config.etherscanAPI,
-        infuraAPI: config.infuraAPI,
-        alchemyAPI: config.alchemyAPI,
+        etherscanAPI: this.network.etherscan,
+        infuraAPI: this.network.infura,
+        alchemyAPI: this.network.alchemy,
       },
       null, // Private Key of the Wallet sending Notification
       address, // The contract address which is going to be used

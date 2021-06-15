@@ -1,5 +1,4 @@
 import { ethers } from 'ethers';
-import config from './config';
 
 export default {
   // Upload to IPFS
@@ -28,8 +27,10 @@ export default {
       const jsonizedPayload = JSON.stringify(payload);
 
       const { create } = require('ipfs-http-client')
+      const ipfsLocal = '/ip4/0.0.0.0/tcp/5001';
+      const ipfsInfura = 'https://ipfs.infura.io:5001';
 
-      let ipfsURL = ipfsGateway? ipfsGateway: (config.ipfsLocal? config.ipfsLocal: config.ipfsInfura);
+      let ipfsURL = ipfsGateway? ipfsGateway: (ipfsLocal? ipfsLocal: ipfsInfura);
       let ipfs: any;
       try{
         ipfs = create(ipfsURL);
@@ -37,7 +38,7 @@ export default {
       catch (err){
         //eg: when url = abcd (invalid)
         if (enableLogs) logger.info(`[${new Date(Date.now())}]- Couldn't connect to ipfs url: %o | Error: %o `, ipfsURL, err);
-        ipfsURL = config.ipfsInfura
+        ipfsURL = ipfsInfura
         ipfs = create(ipfsURL);
         if (enableLogs) logger.info(`[${new Date(Date.now())}]-Switching to : %o `, ipfsURL);
       }
@@ -61,8 +62,8 @@ export default {
         .catch (async (err: Error) => {
           //eg: when url = /ip4/0.0.0.0/tcp/5001 and local ipfs node is not running
           if (enableLogs) logger.info(`[${new Date(Date.now())}]- Couldn't connect to ipfs url: %o | ipfs.add() error: %o`, ipfsURL, err);
-          if(ipfsURL !== config.ipfsInfura){
-            ipfsURL = config.ipfsInfura
+          if(ipfsURL !== ipfsInfura){
+            ipfsURL = ipfsInfura
             ipfs = create(ipfsURL);
             if (enableLogs) logger.info(`[${new Date(Date.now())}]-Switching to : %o `, ipfsURL);
             await ipfsUpload()
