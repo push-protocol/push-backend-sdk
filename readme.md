@@ -14,7 +14,7 @@ Most features will work with nodejs v6.0.0 and higher but using older versions t
 ## Usage
 
 ```javascript
-import epnsHelper, {InfuraSettings, NetWorkSettings} from '../helpers/notificationHelper'
+import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '../helpers/notificationHelper'
 
 // InfuraSettings contains setttings details on infura
 const infuraSettings: InfuraSettings = {
@@ -22,11 +22,18 @@ const infuraSettings: InfuraSettings = {
   projectSecret: config.infuraAPI.projectSecret
 }
 
-// Network settings containst details on alchemy, infura and etherscan
+// Network settings contains details on alchemy, infura and etherscan
 const settings: NetWorkSettings = {
   alchemy: config.alchemyAPI,
   infura: infuraSettings,
   etherscan: config.etherscanAPI
+}
+
+// EPNSSettings settings contains details on EPNS network, contract address and contract ABI
+const epnsSettings: EPNSSettings = {
+  network: config.web3RopstenNetwork,
+  contractAddress: config.deployedContract,
+  contractABI: config.deployedContractABI
 }
 
 // NB: Either one or both alchemy and infura has to be passed in to the sdk settings
@@ -39,13 +46,13 @@ const users = await sdk.getSubscribedUsers();
 const contract = await getContract(address, abi)
 
 // send messages to a particular user (or simulate by passing a boolean)
-await sendNotification(user, title, message, payloadTitle, payloadMsg, simulate)
+await sendNotification(user, title, message, payloadTitle, payloadMsg, notificationType, simulate)
 ```
 
 ## Advanced usage
 
 ```javascript
-import epnsHelper, {InfuraSettings, NetWorkSettings} from '../helpers/notificationHelper'
+import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '../helpers/notificationHelper'
 
 const sdk = new epnsHelper(config.web3MainnetNetwork, channelKey, settings)
 ```
