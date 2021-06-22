@@ -3,7 +3,7 @@ import { ethers } from 'ethers';
 export default {
   // Upload to IPFS
   uploadToIPFS: async (payload: any, logger: any, ipfsGateway: any, simulate: any) => {
-    const enableLogs = 0;
+    const enableLogs = 1;
 
     return new Promise(async (resolve, reject) => {
       if (
@@ -129,10 +129,10 @@ export default {
     logger: any,
     simulate: any,
   ) => {
-    const enableLogs = 0;
+    const enableLogs = 1;
 
     // SIMULATE OBJECT CHECK
-    if (simulate && typeof simulate == 'object' && simulate.hasOwnProperty('txOverride')) {
+    if (simulate && typeof simulate == 'object' && simulate.hasOwnProperty('txOverride') && simulate.txOverride.mode) {
       if (simulate.txOverride.hasOwnProperty('recipientAddr')) recipientAddr = simulate.txOverride.recipientAddr;
       if (simulate.txOverride.hasOwnProperty('notificationType'))
         notificationType = simulate.txOverride.notificationType;
