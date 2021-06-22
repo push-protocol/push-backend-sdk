@@ -113,9 +113,10 @@ export default class NotificationHelper {
     message: string,
     payloadTitle: string,
     payloadMsg: string,
+    notificationType: number,
     simulate: boolean | Object,
   ) {
-    const hash = await this.getPayloadHash(user, title, message, payloadTitle, payloadMsg, simulate);
+    const hash = await this.getPayloadHash(user, title, message, payloadTitle, payloadMsg, notificationType, simulate);
     // Send notification
     const ipfshash = hash.ipfshash;
     const payloadType = hash.payloadType;
@@ -152,9 +153,10 @@ export default class NotificationHelper {
     message: string,
     payloadTitle: string,
     payloadMsg: string,
+    notificationType: number,
     simulate: boolean | Object,
   ) {
-    const payload: any = await this.getPayload(title, message, payloadTitle, payloadMsg);
+    const payload: any = await this.getPayload(title, message, payloadTitle, payloadMsg, notificationType);
     const ipfshash = await epnsNotify.uploadToIPFS(payload, logger, null, simulate);
     // Sign the transaction and send it to chain
     return {
@@ -174,10 +176,10 @@ export default class NotificationHelper {
    * @param payloadMsg Internal Message
    * @returns
    */
-  private async getPayload(title: string, message: string, payloadTitle: string, payloadMsg: string) {
+  private async getPayload(title: string, message: string, payloadTitle: string, payloadMsg: string, notificationType: number) {
     return epnsNotify.preparePayload(
       null, // Recipient Address | Useful for encryption
-      3, // Type of Notification
+      notificationType, // Type of Notification
       title, // Title of Notification
       message, // Message of Notification
       payloadTitle, // Internal Title
