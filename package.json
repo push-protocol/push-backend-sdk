@@ -1,11 +1,11 @@
 {
   "name": "@epnsproject/backend-sdk",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "description": "SDK for sending notifications on EPNS",
   "scripts": {
     "git": "func() { git add . && git commit -m \"$1\" && git push origin HEAD; }; func",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc && cp ./src/config/epns_contract.json ./lib/config/epns_contract.json ",
+    "build": "tsc",
     "build:check": "tsc --noEmit",
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
     "lint": "tslint -p tsconfig.json"
