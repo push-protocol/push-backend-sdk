@@ -37,7 +37,7 @@ const epnsSettings: EPNSSettings = {
 }
 
 // NB: Either one or both alchemy and infura has to be passed in to the sdk settings
-const sdk = new epnsHelper(config.web3MainnetNetwork, channelKey, settings)
+const sdk = new epnsHelper(config.web3MainnetNetwork, channelKey, settings, epnsSettings)
 
 // getSubscribedUsers gets all subscribed users to the EPNS channel passed in on initialisation
 const users = await sdk.getSubscribedUsers();
