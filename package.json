@@ -1,6 +1,6 @@
 {
   "name": "@epnsproject/backend-sdk",
-  "version": "1.0.15",
+  "version": "1.0.19",
   "description": "SDK for sending notifications on EPNS",
   "scripts": {
     "git": "func() { git add . && git commit -m \"$1\" && git push origin HEAD; }; func",
@@ -28,8 +28,7 @@
   "dependencies": {
     "ethers": "^5.2.0",
     "ipfs-http-client": "^50.1.1",
-    "winston": "^3.3.3",
-    "winston-daily-rotate-file": "^4.5.5"
+    "winston": "^3.3.3"
   },
   "devDependencies": {
     "@types/node": "^15.9.0",
