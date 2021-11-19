@@ -1,3 +1,4 @@
+import {postReq} from './config/axios';
 import epnsNotify from './epnsNotifyHelper';
 import { ethers } from 'ethers';
 import logger from './logger';
@@ -35,12 +36,15 @@ export interface EPNSSettings {
   contractABI: string;
 }
 
+export type NotificationNetworkType = "polygon" | "ropsten";
+
 export default class NotificationHelper {
   private channelKey: string;
   private web3network: string;
   private network: NetWorkSettings;
   private epnsSettings: EPNSSettings;
-  private epns;
+  private epnsCore;
+  private epnsCommunicator;
   // private infura: InfuraSettings
   // private alchemy: string;
   // private etherscan: string;
@@ -50,17 +54,18 @@ export default class NotificationHelper {
    * @param channelKey Channel private key
    * @param epnsSettings Network of epns contract
    */
-  constructor(web3network: string, channelKey: string, network: NetWorkSettings, epnsSettings: EPNSSettings) {
+  constructor(web3network: string, channelKey: string, network: NetWorkSettings, epnsCoreSettings: EPNSSettings, epnsCommunicatorSettings: EPNSSettings) {
     this.channelKey = channelKey;
     this.web3network = web3network;
-    this.epnsSettings = epnsSettings;
+    this.epnsSettings = epnsCoreSettings;
     this.network = network;
     // if (network.alchemy) this.alchemy = network.alchemy
     // if (network.infura) this.infura = network.infura
     if (!network.alchemy && !network.infura) {
       throw new Error('Initialize using an alchemy key or Infura parameters');
     }
-    this.epns = getEPNSInteractableContract(epnsSettings, channelKey, network.etherscan, network.alchemy, network.infura);
+    this.epnsCore = getEPNSInteractableContract(epnsCoreSettings, channelKey, network.etherscan, network.alchemy, network.infura);
+    this.epnsCommunicator = getEPNSInteractableContract(epnsCommunicatorSettings, channelKey, network.etherscan, network.alchemy, network.infura);
   }
 
   public advanced = epnsNotify;
@@ -72,14 +77,19 @@ export default class NotificationHelper {
    */
   async getSubscribedUsers() {
     const channelAddress = ethers.utils.computeAddress(this.channelKey);
-    const channelInfo = await this.epns.contract.channels(channelAddress);
-    const filter = this.epns.contract.filters.Subscribe(channelAddress);
-    let startBlock = channelInfo.channelStartBlock.toNumber();
-
-    //Function to get all the addresses in the channel
-    const eventLog = await this.epns.contract.queryFilter(filter, startBlock);
-    const users = eventLog.map((log: any) => log.args.user);
-    return users;
+    const channelSubscribers = await postReq('/channels/get_subscribers',{
+      "channel": channelAddress,
+      "op": 'read'
+    })
+    .then((res:any) => {
+      const { subscribers } = res.data;
+      return subscribers;
+    })
+    .catch((err) => {
+      console.log({err});
+      return []
+    })
+    return channelSubscribers;
   }
 
   async getContract(address: string, abi: string) {
@@ -114,9 +124,30 @@ export default class NotificationHelper {
     payloadTitle: string,
     payloadMsg: string,
     notificationType: number,
-    simulate: boolean | Object,
+    cta: string | undefined,
+    img: string | undefined,
+    simulate: any,
+    {offChain = false} = {} //add optional parameter for offchain sending of notification
   ) {
-    const hash = await this.getPayloadHash(user, title, message, payloadTitle, payloadMsg, notificationType, simulate);
+    // check if offchain notification is enabled and send a different notification type
+    if(offChain){
+      if (simulate && typeof simulate == 'object' && simulate.hasOwnProperty('txOverride') && simulate.txOverride.mode) {
+        if (simulate.txOverride.hasOwnProperty('recipientAddr')) user = simulate.txOverride.recipientAddr;
+        if (simulate.txOverride.hasOwnProperty('notificationType'))
+          notificationType = simulate.txOverride.notificationType;
+      }
+  
+      const payload: any = await this.getPayload(title, message, payloadTitle, payloadMsg, notificationType, cta, img);
+      const response = await epnsNotify.sendOffchainNotification(
+        this.epnsCommunicator,
+        payload,
+        this.channelKey,
+        user
+      );
+      return response;
+    }
+    const hash = await this.getPayloadHash(user, title, message, payloadTitle, payloadMsg, notificationType, cta, img,simulate);
+
     // Send notification
     const ipfshash = hash.ipfshash;
     const payloadType = hash.payloadType;
@@ -124,8 +155,11 @@ export default class NotificationHelper {
     const storageType = 1; // IPFS Storage Type
     const txConfirmWait = 1; // Wait for 0 tx confirmation
 
+    const channelAddress = ethers.utils.computeAddress(this.channelKey);
+    console.log({channelAddress});
     const tx = await epnsNotify.sendNotification(
-      this.epns.signingContract, // Contract connected to signing wallet
+      this.epnsCommunicator.signingContract, // Contract connected to signing wallet
+      channelAddress,
       user, // Recipient to which the payload should be sent
       payloadType, // Notification Type
       storageType, // Notificattion Storage Type
@@ -154,9 +188,11 @@ export default class NotificationHelper {
     payloadTitle: string,
     payloadMsg: string,
     notificationType: number,
+    cta: string|undefined,
+    img: string|undefined,
     simulate: boolean | Object,
   ) {
-    const payload: any = await this.getPayload(title, message, payloadTitle, payloadMsg, notificationType);
+    const payload: any = await this.getPayload(title, message, payloadTitle, payloadMsg, notificationType, cta, img);
     const ipfshash = await epnsNotify.uploadToIPFS(payload, logger, null, simulate);
     // Sign the transaction and send it to chain
     return {
@@ -176,7 +212,7 @@ export default class NotificationHelper {
    * @param payloadMsg Internal Message
    * @returns
    */
-  private async getPayload(title: string, message: string, payloadTitle: string, payloadMsg: string, notificationType: number) {
+  private async getPayload(title: string, message: string, payloadTitle: string, payloadMsg: string, notificationType: number, cta: string | undefined, img: string | undefined) {
     return epnsNotify.preparePayload(
       null, // Recipient Address | Useful for encryption
       notificationType, // Type of Notification
@@ -184,8 +220,8 @@ export default class NotificationHelper {
       message, // Message of Notification
       payloadTitle, // Internal Title
       payloadMsg, // Internal Message
-      null, // Internal Call to Action Link
-      null, // internal img of youtube link
+      cta, // Internal Call to Action Link
+      img, // internal img of youtube link
     );
   }
 }

@@ -71,7 +71,7 @@ const formatter = winston.format.combine(
 
 const transports = [];
 transports.push(
-    new winston.transports.Console({
+  new winston.transports.Console({
     format: formatter,
   }),
 );
