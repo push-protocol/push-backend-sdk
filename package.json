@@ -1,5 +1,5 @@
 {
-  "name": "@epnsproject/backend-sdk-staging",
+  "name": "@epnsproject/backend-sdk",
   "version": "1.2.0",
   "description": "SDK staging for sending notifications on EPNS",
   "scripts": {
