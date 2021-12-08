@@ -30,7 +30,14 @@ const settings: NetWorkSettings = {
 }
 
 // EPNSSettings settings contains details on EPNS network, contract address and contract ABI
-const epnsSettings: EPNSSettings = {
+const epnsCoreSettings: EPNSSettings = {
+  network: config.web3RopstenNetwork,
+  contractAddress: config.deployedContract,
+  contractABI: config.deployedContractABI
+}
+
+// EPNSSettings communicator contains details on EPNS network, contract address and contract ABI
+const epnsCommSettings: EPNSSettings = {
   network: config.web3RopstenNetwork,
   contractAddress: config.deployedContract,
   contractABI: config.deployedContractABI
@@ -38,7 +45,7 @@ const epnsSettings: EPNSSettings = {
 
 // NB: Either one or both alchemy and infura has to be passed in to the sdk settings
 // channelPrivateKey must begin with '0x'
-const sdk = new epnsHelper(config.web3MainnetNetwork, channelPrivateKey, settings, epnsSettings)
+const sdk = new epnsHelper(config.web3MainnetNetwork, channelPrivateKey, settings, epnsCoreSettings, epnsCommSettings)
 
 // getSubscribedUsers gets all subscribed users to the EPNS channel passed in on initialisation
 const users = await sdk.getSubscribedUsers();
@@ -48,12 +55,4 @@ const contract = await getContract(address, abi)
 
 // send messages to a particular user (or simulate by passing a boolean)
 await sendNotification(user, title, message, payloadTitle, payloadMsg, notificationType, simulate)
-```
-
-## Advanced usage
-
-```javascript
-import epnsHelper, {InfuraSettings, NetWorkSettings, EPNSSettings} from '../helpers/notificationHelper'
-
-const sdk = new epnsHelper(config.web3MainnetNetwork, channelKey, settings)
 ```

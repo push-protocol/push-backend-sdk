@@ -1,6 +1,56 @@
 import { ethers } from 'ethers';
+import config from './config';
+import { postReq } from './config/axios';
+
 
 export default {
+  sendOffchainNotification: async (signingContract:any, payload: any, channelPrivateKey: any, recipientAddr: any) => {
+    // define the signing parameters
+    const chainId:string = (await signingContract.contract.chainID()).toString();
+    const verifyingContract = signingContract.contract.address;
+
+    // define an interface to a wallet to sign the parameters
+    const wallet = new ethers.Wallet(channelPrivateKey);
+
+    const DOMAIN = {
+      name: 'EPNS',
+      version: '1.0.0',
+      chainId: 3,
+      verifyingContract
+    }
+    const TYPE = {
+      Data: [
+        { name: "acta", type: "string" },
+        { name: "aimg", type: "string" },
+        { name: "amsg", type: "string" },
+        { name: "asub", type: "string" },
+        { name: "type", type: "string" },
+        { name: "secret", type: "string" },
+      ],
+    }
+
+    const MESSAGE = {...payload.data};
+    const signature = await wallet._signTypedData(DOMAIN, TYPE, MESSAGE);
+    const backendPayload = {
+      channel: ethers.utils.computeAddress(channelPrivateKey),
+      recipient: recipientAddr,
+      signature: signature,
+      type: MESSAGE.type,
+      deployedContract: verifyingContract,
+      chainId: chainId,
+      payload,
+      op: 'write'
+    };
+    
+    return postReq('/payloads/add_manual_payload', {...backendPayload})
+    .then(({data}) => {
+      return data;
+    })
+    .catch((err) => {
+      return err.message
+    })
+    // make api request
+  },
   // Upload to IPFS
   uploadToIPFS: async (payload: any, logger: any, ipfsGateway: any, simulate: any) => {
     const enableLogs = 1;
@@ -101,6 +151,7 @@ export default {
         ? { projectId: apiKeys.infuraAPI.projectID, projectSecret: apiKeys.infuraAPI.projectSecret }
         : null,
       alchemy: apiKeys.alchemyAPI ? apiKeys.alchemyAPI : null,
+      quorum: 1
     });
 
     const contract = new ethers.Contract(deployedContract, deployedContractABI, provider);
@@ -121,6 +172,7 @@ export default {
   // Send Notification to EPNS Contract
   sendNotification: async (
     signingContract: any,
+    channel: any,
     recipientAddr: any,
     notificationType: any,
     notificationStorageType: any,
@@ -130,7 +182,6 @@ export default {
     simulate: any,
   ) => {
     const enableLogs = 1;
-
     // SIMULATE OBJECT CHECK
     if (simulate && typeof simulate == 'object' && simulate.hasOwnProperty('txOverride') && simulate.txOverride.mode) {
       if (simulate.txOverride.hasOwnProperty('recipientAddr')) recipientAddr = simulate.txOverride.recipientAddr;
@@ -169,8 +220,8 @@ export default {
         // nothing to do in simulation
         return;
       }
-
-      const txPromise = signingContract.sendNotification(recipientAddr, identityBytes);
+    
+      const txPromise = signingContract.sendNotification(channel, recipientAddr, identityBytes);
 
       txPromise
         .then(async function (tx: any) {
