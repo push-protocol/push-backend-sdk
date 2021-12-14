@@ -15,7 +15,7 @@ export default {
     const DOMAIN = {
       name: 'EPNS',
       version: '1.0.0',
-      chainId: 3,
+      chainId: 42,
       verifyingContract
     }
     const TYPE = {
