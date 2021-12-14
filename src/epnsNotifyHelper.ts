@@ -13,7 +13,8 @@ export default {
     const wallet = new ethers.Wallet(channelPrivateKey);
 
     const DOMAIN = {
-      name: 'EPNS COMM V1',
+      name: 'EPNS',
+      version: '1.0.0',
       chainId: 42,
       verifyingContract
     }
