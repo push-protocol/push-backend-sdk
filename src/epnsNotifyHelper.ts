@@ -4,7 +4,7 @@ import { postReq } from './config/axios';
 
 
 export default {
-  sendOffchainNotification: async (signingContract:any, payload: any, channelPrivateKey: any, recipientAddr: any) => {
+  sendOffchainNotification: async (signingContract:any, payload: any, channelPrivateKey: any, recipientAddr: any, channelAddress: any) => {
     // define the signing parameters
     const chainId:string = (await signingContract.contract.chainID()).toString();
     const verifyingContract = signingContract.contract.address;
@@ -31,7 +31,7 @@ export default {
     const MESSAGE = {...payload.data};
     const signature = await wallet._signTypedData(DOMAIN, TYPE, MESSAGE);
     const backendPayload = {
-      channel: ethers.utils.computeAddress(channelPrivateKey),
+      channel: channelAddress,
       recipient: recipientAddr,
       signature: signature,
       type: MESSAGE.type,

@@ -124,6 +124,7 @@ export default class NotificationHelper {
     payloadTitle: string,
     payloadMsg: string,
     notificationType: number,
+    channelAddress: string,
     cta: string | undefined,
     img: string | undefined,
     simulate: any,
@@ -142,7 +143,8 @@ export default class NotificationHelper {
         this.epnsCommunicator,
         payload,
         this.channelKey,
-        user
+        user,
+        channelAddress
       );
       return response;
     }
@@ -155,7 +157,7 @@ export default class NotificationHelper {
     const storageType = 1; // IPFS Storage Type
     const txConfirmWait = 1; // Wait for 0 tx confirmation
 
-    const channelAddress = ethers.utils.computeAddress(this.channelKey);
+    //const channelAddress = ethers.utils.computeAddress(this.channelKey);
     console.log({channelAddress});
     const tx = await epnsNotify.sendNotification(
       this.epnsCommunicator.signingContract, // Contract connected to signing wallet
