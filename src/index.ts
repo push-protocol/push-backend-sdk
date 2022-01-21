@@ -44,6 +44,7 @@ export default class NotificationHelper {
   private network: NetWorkSettings;
   private epnsSettings: EPNSSettings;
   private epnsCore;
+  private channelAddress;
   private epnsCommunicator;
   // private infura: InfuraSettings
   // private alchemy: string;
@@ -54,10 +55,11 @@ export default class NotificationHelper {
    * @param channelKey Channel private key
    * @param epnsSettings Network of epns contract
    */
-  constructor(web3network: string, channelKey: string, network: NetWorkSettings, epnsCoreSettings: EPNSSettings, epnsCommunicatorSettings: EPNSSettings) {
+  constructor(web3network: string, channelKey: string, channelAddress: string, network: NetWorkSettings, epnsCoreSettings: EPNSSettings, epnsCommunicatorSettings: EPNSSettings) {
     this.channelKey = channelKey;
     this.web3network = web3network;
     this.epnsSettings = epnsCoreSettings;
+    this.channelAddress = channelAddress;
     this.network = network;
     // if (network.alchemy) this.alchemy = network.alchemy
     // if (network.infura) this.infura = network.infura
@@ -76,9 +78,8 @@ export default class NotificationHelper {
    * @returns
    */
   async getSubscribedUsers() {
-    const channelAddress = ethers.utils.computeAddress(this.channelKey);
     const channelSubscribers = await postReq('/channels/get_subscribers',{
-      "channel": channelAddress,
+      "channel": this.channelAddress,
       "op": 'read'
     })
     .then((res:any) => {
@@ -124,12 +125,12 @@ export default class NotificationHelper {
     payloadTitle: string,
     payloadMsg: string,
     notificationType: number,
-    channelAddress: string,
     cta: string | undefined,
     img: string | undefined,
     simulate: any,
     {offChain = false} = {} //add optional parameter for offchain sending of notification
   ) {
+    const channelAddress = this.channelAddress;
     // check if offchain notification is enabled and send a different notification type
     if(offChain){
       if (simulate && typeof simulate == 'object' && simulate.hasOwnProperty('txOverride') && simulate.txOverride.mode) {
