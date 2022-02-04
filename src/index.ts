@@ -196,6 +196,9 @@ export default class NotificationHelper {
     simulate: boolean | Object,
   ) {
     const payload: any = await this.getPayload(title, message, payloadTitle, payloadMsg, notificationType, cta, img);
+
+    payload['recipients'] = user; // set payload['recipients'] to be euqal to the recipients, usefull for subset notifications
+
     const ipfshash = await epnsNotify.uploadToIPFS(payload, logger, null, simulate);
     // Sign the transaction and send it to chain
     return {
