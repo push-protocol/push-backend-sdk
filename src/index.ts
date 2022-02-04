@@ -139,7 +139,7 @@ export default class NotificationHelper {
           notificationType = simulate.txOverride.notificationType;
       }
   
-      const payload: any = await this.getPayload(title, message, payloadTitle, payloadMsg, notificationType, cta, img);
+      const payload: any = await this.getPayload(title, message, payloadTitle, payloadMsg, notificationType, cta, img, null);
       const response = await epnsNotify.sendOffchainNotification(
         this.epnsCommunicator,
         payload,
@@ -195,9 +195,7 @@ export default class NotificationHelper {
     img: string|undefined,
     simulate: boolean | Object,
   ) {
-    const payload: any = await this.getPayload(title, message, payloadTitle, payloadMsg, notificationType, cta, img);
-
-    payload['recipients'] = user; // set payload['recipients'] to be euqal to the recipients, usefull for subset notifications
+    const payload: any = await this.getPayload(title, message, payloadTitle, payloadMsg, notificationType, cta, img, user);
 
     const ipfshash = await epnsNotify.uploadToIPFS(payload, logger, null, simulate);
     // Sign the transaction and send it to chain
@@ -218,9 +216,9 @@ export default class NotificationHelper {
    * @param payloadMsg Internal Message
    * @returns
    */
-  private async getPayload(title: string, message: string, payloadTitle: string, payloadMsg: string, notificationType: number, cta: string | undefined, img: string | undefined) {
+  private async getPayload(title: string, message: string, payloadTitle: string, payloadMsg: string, notificationType: number, cta: string | undefined, img: string | undefined, user: string | null | undefined) {
     return epnsNotify.preparePayload(
-      null, // Recipient Address | Useful for encryption
+      user, // Recipient Address | Useful for encryption
       notificationType, // Type of Notification
       title, // Title of Notification
       message, // Message of Notification

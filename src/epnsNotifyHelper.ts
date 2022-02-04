@@ -189,7 +189,7 @@ export default {
       if (simulate.txOverride.hasOwnProperty('notificationStorageType'))
         notificationStorageType = simulate.txOverride.notificationStorageType;
     }
-
+    recipientAddr = notificationType === 4 ? channel : recipientAddr; //for subset type, we should make recipient the channel address
     return new Promise((resolve, reject) => {
       // Create Transaction
       const identity = notificationType + '+' + notificationStoragePointer;
@@ -256,7 +256,7 @@ export default {
       let dcta = payloadCTA ? payloadCTA.toString() : '';
       let dimg = payloadImg ? payloadImg.toString() : '';
 
-      const payload = {
+      const payload:any = {
         notification: {
           title: ntitle,
           body: nbody,
@@ -270,6 +270,11 @@ export default {
           aimg: dimg,
         },
       };
+
+      // if they pass in a recipient address 
+      if(Boolean(recipientAddr)){
+        payload['recipient'] = recipientAddr
+      }
 
       resolve(payload);
     });
