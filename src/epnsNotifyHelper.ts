@@ -1,34 +1,41 @@
+import axios from 'axios';
 import { ethers } from 'ethers';
+import { EPNSSettings } from '.';
 import config from './config';
 import { postReq } from './config/axios';
 
-
 export default {
-  sendOffchainNotification: async (signingContract:any, payload: any, channelPrivateKey: any, recipientAddr: any, channelAddress: any) => {
+  generateOffChainSignature: async (
+    communicatorDetails: EPNSSettings,
+    payload: any,
+    channelPrivateKey: any,
+    recipientAddr: any,
+    channelAddress: any,
+  ) => {
     // define the signing parameters
-    const chainId:string = (await signingContract.contract.chainID()).toString();
-    const verifyingContract = signingContract.contract.address;
+    const chainId: string = communicatorDetails.network;
+    const verifyingContract = communicatorDetails.contractAddress;
 
     // define an interface to a wallet to sign the parameters
     const wallet = new ethers.Wallet(channelPrivateKey);
 
     const DOMAIN = {
       name: 'EPNS COMM V1',
-      chainId: 1,
-      verifyingContract
-    }
+      chainId: parseInt(chainId),
+      verifyingContract,
+    };
     const TYPE = {
       Data: [
-        { name: "acta", type: "string" },
-        { name: "aimg", type: "string" },
-        { name: "amsg", type: "string" },
-        { name: "asub", type: "string" },
-        { name: "type", type: "string" },
-        { name: "secret", type: "string" },
+        { name: 'acta', type: 'string' },
+        { name: 'aimg', type: 'string' },
+        { name: 'amsg', type: 'string' },
+        { name: 'asub', type: 'string' },
+        { name: 'type', type: 'string' },
+        { name: 'secret', type: 'string' },
       ],
-    }
+    };
 
-    const MESSAGE = {...payload.data};
+    const MESSAGE = { ...payload.data };
     const signature = await wallet._signTypedData(DOMAIN, TYPE, MESSAGE);
     const backendPayload = {
       channel: channelAddress,
@@ -38,16 +45,21 @@ export default {
       deployedContract: verifyingContract,
       chainId: chainId,
       payload,
-      op: 'write'
+      op: 'write',
     };
-    
-    return postReq('/payloads/add_manual_payload', {...backendPayload})
-    .then(({data}) => {
-      return data;
-    })
-    .catch((err) => {
-      return err.message
-    })
+    return backendPayload;
+  },
+
+  sendOffchainNotification: async (backendPayload: any) => {
+    return postReq('/payloads/add_manual_payload', { ...backendPayload })
+      .then(({ data, status }) => {
+        return { ...data, statusCode: status };
+      })
+      .catch((err) => {
+        console.log({err})
+        const { status, message } = JSON.parse(JSON.stringify(err));
+        return { statusCode: status, message: message, retry: !Boolean(status) || `${status}`.startsWith('5') };
+      });
     // make api request
   },
   // Upload to IPFS
@@ -75,82 +87,92 @@ export default {
       // Stringify it
       const jsonizedPayload = JSON.stringify(payload);
 
-      const { create } = require('ipfs-http-client')
+      const { create } = require('ipfs-http-client');
       const ipfsLocal = '/ip4/0.0.0.0/tcp/5001';
       const ipfsInfura = 'https://ipfs.infura.io:5001';
 
-      let ipfsURL = ipfsGateway? ipfsGateway: (ipfsLocal? ipfsLocal: ipfsInfura);
+      let ipfsURL = ipfsGateway ? ipfsGateway : ipfsLocal ? ipfsLocal : ipfsInfura;
       let ipfs: any;
-      try{
+      try {
         ipfs = create(ipfsURL);
-      }
-      catch (err){
+      } catch (err) {
         //eg: when url = abcd (invalid)
-        if (enableLogs) logger.info(`[${new Date(Date.now())}]- Couldn't connect to ipfs url: %o | Error: %o `, ipfsURL, err);
-        ipfsURL = ipfsInfura
+        if (enableLogs)
+          logger.info(`[${new Date(Date.now())}]- Couldn't connect to ipfs url: %o | Error: %o `, ipfsURL, err);
+        ipfsURL = ipfsInfura;
         ipfs = create(ipfsURL);
         if (enableLogs) logger.info(`[${new Date(Date.now())}]-Switching to : %o `, ipfsURL);
       }
 
-      const ipfsUpload= async() => {
+      const ipfsUpload = async () => {
         await ipfs
-        .add(jsonizedPayload)
-        .then(async (data: any) => {
-          if (enableLogs) logger.info(`[${new Date(Date.now())}]-Success --> uploadToIPFS(): %o `, data);
-          if (enableLogs) logger.info(`[${new Date(Date.now())}] - 🚀 CID: %o`, data.cid.toString())
-          await ipfs.pin.add(data.cid)
-          .then((pinCid: any) => {
-            if (enableLogs) logger.info(`[${new Date(Date.now())}]- 🚀 pinCid: %o`, pinCid.toString())
-            resolve(pinCid.toString());
+          .add(jsonizedPayload)
+          .then(async (data: any) => {
+            if (enableLogs) logger.info(`[${new Date(Date.now())}]-Success --> uploadToIPFS(): %o `, data);
+            if (enableLogs) logger.info(`[${new Date(Date.now())}] - 🚀 CID: %o`, data.cid.toString());
+            await ipfs.pin
+              .add(data.cid)
+              .then((pinCid: any) => {
+                if (enableLogs) logger.info(`[${new Date(Date.now())}]- 🚀 pinCid: %o`, pinCid.toString());
+                resolve(pinCid.toString());
+              })
+              .catch((err: Error) => {
+                if (enableLogs) logger.error(`[${new Date(Date.now())}]-!!!Error --> ipfs.pin.add(): %o`, err);
+                reject(err);
+              });
           })
-          .catch ((err: Error) => {
-            if (enableLogs) logger.error(`[${new Date(Date.now())}]-!!!Error --> ipfs.pin.add(): %o`, err);
-            reject(err);
+          .catch(async (err: Error) => {
+            //eg: when url = /ip4/0.0.0.0/tcp/5001 and local ipfs node is not running
+            if (enableLogs)
+              logger.info(
+                `[${new Date(Date.now())}]- Couldn't connect to ipfs url: %o | ipfs.add() error: %o`,
+                ipfsURL,
+                err,
+              );
+            if (ipfsURL !== ipfsInfura) {
+              ipfsURL = ipfsInfura;
+              ipfs = create(ipfsURL);
+              if (enableLogs) logger.info(`[${new Date(Date.now())}]-Switching to : %o `, ipfsURL);
+              await ipfsUpload()
+                .then((cid) => {
+                  resolve(cid);
+                })
+                .catch((err) => {
+                  if (enableLogs) logger.error(`[${new Date(Date.now())}]-!!!Error --> ipfsUpload(): %o`, err);
+                  reject(err);
+                });
+            } else {
+              reject(err);
+            }
           });
-        })
-        .catch (async (err: Error) => {
-          //eg: when url = /ip4/0.0.0.0/tcp/5001 and local ipfs node is not running
-          if (enableLogs) logger.info(`[${new Date(Date.now())}]- Couldn't connect to ipfs url: %o | ipfs.add() error: %o`, ipfsURL, err);
-          if(ipfsURL !== ipfsInfura){
-            ipfsURL = ipfsInfura
-            ipfs = create(ipfsURL);
-            if (enableLogs) logger.info(`[${new Date(Date.now())}]-Switching to : %o `, ipfsURL);
-            await ipfsUpload()
-            .then(cid =>{
-              resolve(cid)
-            })
-            .catch(err => {
-              if (enableLogs) logger.error(`[${new Date(Date.now())}]-!!!Error --> ipfsUpload(): %o`, err);
-              reject(err)
-            })
-          }
-          else{
-            reject(err)
-          }
-        });
-      }
+      };
 
-      try{
-        const cid = await ipfsUpload()
-        resolve(cid)
-      }
-      catch(err){
+      try {
+        const cid = await ipfsUpload();
+        resolve(cid);
+      } catch (err) {
         if (enableLogs) logger.error(`[${new Date(Date.now())}]-!!!Error --> ipfsUpload(): %o`, err);
-        reject(err)
+        reject(err);
       }
     });
   },
   // Get Interactable Contracts
-  getInteractableContracts: (network: any, apiKeys: any, walletPK: any, deployedContract: any, deployedContractABI: any) => {
+  getInteractableContracts: (
+    network: any,
+    apiKeys: any,
+    walletPK: any,
+    deployedContract: any,
+    deployedContractABI: any,
+  ) => {
     const enableLogs = 0;
-
-    const provider = ethers.getDefaultProvider(network, {
+    const parsedNetwork = parseInt(network) ? parseInt(network) : network; // if chainId is
+    const provider = ethers.getDefaultProvider(parsedNetwork, {
       etherscan: apiKeys.etherscanAPI ? apiKeys.etherscanAPI : null,
       infura: apiKeys.infuraAPI
         ? { projectId: apiKeys.infuraAPI.projectID, projectSecret: apiKeys.infuraAPI.projectSecret }
         : null,
       alchemy: apiKeys.alchemyAPI ? apiKeys.alchemyAPI : null,
-      quorum: 1
+      quorum: 1,
     });
 
     const contract = new ethers.Contract(deployedContract, deployedContractABI, provider);
@@ -219,7 +241,7 @@ export default {
         // nothing to do in simulation
         return;
       }
-    
+
       const txPromise = signingContract.sendNotification(channel, recipientAddr, identityBytes);
 
       txPromise
@@ -242,7 +264,16 @@ export default {
     });
   },
   // Prepare Payload for Notification
-  preparePayload: async (recipientAddr: any, payloadType: any, title: any, body: any, payloadTitle: any, payloadMsg: any, payloadCTA: any, payloadImg: any) => {
+  preparePayload: async (
+    recipientAddr: any,
+    payloadType: any,
+    title: any,
+    body: any,
+    payloadTitle: any,
+    payloadMsg: any,
+    payloadCTA: any,
+    payloadImg: any,
+  ) => {
     const enableLogs = 0;
 
     return new Promise((resolve, reject) => {
@@ -256,7 +287,7 @@ export default {
       let dcta = payloadCTA ? payloadCTA.toString() : '';
       let dimg = payloadImg ? payloadImg.toString() : '';
 
-      const payload:any = {
+      const payload: any = {
         notification: {
           title: ntitle,
           body: nbody,
@@ -271,9 +302,9 @@ export default {
         },
       };
 
-      // if they pass in a recipient address 
-      if(Boolean(recipientAddr)){
-        payload['recipient'] = recipientAddr
+      // if they pass in a recipient address
+      if (Boolean(recipientAddr)) {
+        payload['recipient'] = recipientAddr;
       }
 
       resolve(payload);
