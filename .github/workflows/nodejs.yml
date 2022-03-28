@@ -37,4 +37,4 @@ jobs:
           VALIDATE_MARKDOWN: false
           DEFAULT_BRANCH: ci-cd
           GITHUB_TOKEN: ${{ secrets.git_TOKEN }}
-      - run: npm run test --if-present
+          
