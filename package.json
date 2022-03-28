@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rm -rf lib && tsc && mkdir lib/data && cp ./src/data/*.json ./lib/data/",
     "build:check": "tsc --noEmit",
-    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
+    "format": "prettier --write \"src/**/*.{js,jsx,json,ts,tsx,css,html}\"",
     "lint": "tslint -p tsconfig.json"
   },
   "repository": {
