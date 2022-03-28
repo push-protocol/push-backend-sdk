@@ -408,24 +408,16 @@
     "type": "function"
   },
   {
-    "inputs": [
-      { "internalType": "address", "name": "_channel", "type": "address" }
-    ],
+    "inputs": [{ "internalType": "address", "name": "_channel", "type": "address" }],
     "name": "getChannelState",
-    "outputs": [
-      { "internalType": "uint256", "name": "state", "type": "uint256" }
-    ],
+    "outputs": [{ "internalType": "uint256", "name": "state", "type": "uint256" }],
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [
-      { "internalType": "address", "name": "_channel", "type": "address" }
-    ],
+    "inputs": [{ "internalType": "address", "name": "_channel", "type": "address" }],
     "name": "getChannelVerfication",
-    "outputs": [
-      { "internalType": "uint8", "name": "verificationStatus", "type": "uint8" }
-    ],
+    "outputs": [{ "internalType": "uint8", "name": "verificationStatus", "type": "uint8" }],
     "stateMutability": "view",
     "type": "function"
   },
@@ -551,27 +543,21 @@
     "type": "function"
   },
   {
-    "inputs": [
-      { "internalType": "uint256", "name": "_amount", "type": "uint256" }
-    ],
+    "inputs": [{ "internalType": "uint256", "name": "_amount", "type": "uint256" }],
     "name": "reactivateChannel",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "inputs": [
-      { "internalType": "uint256", "name": "_newFees", "type": "uint256" }
-    ],
+    "inputs": [{ "internalType": "uint256", "name": "_newFees", "type": "uint256" }],
     "name": "setChannelDeactivationFees",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "inputs": [
-      { "internalType": "address", "name": "_commAddress", "type": "address" }
-    ],
+    "inputs": [{ "internalType": "address", "name": "_commAddress", "type": "address" }],
     "name": "setEpnsCommunicatorAddress",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -598,27 +584,21 @@
     "type": "function"
   },
   {
-    "inputs": [
-      { "internalType": "uint256", "name": "_newFees", "type": "uint256" }
-    ],
+    "inputs": [{ "internalType": "uint256", "name": "_newFees", "type": "uint256" }],
     "name": "setMinChannelCreationFees",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "inputs": [
-      { "internalType": "address", "name": "_newAdmin", "type": "address" }
-    ],
+    "inputs": [{ "internalType": "address", "name": "_newAdmin", "type": "address" }],
     "name": "transferPushChannelAdminControl",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "inputs": [
-      { "internalType": "address", "name": "_channel", "type": "address" }
-    ],
+    "inputs": [{ "internalType": "address", "name": "_channel", "type": "address" }],
     "name": "unverifyChannel",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -635,27 +615,21 @@
     "type": "function"
   },
   {
-    "inputs": [
-      { "internalType": "address", "name": "_newAddress", "type": "address" }
-    ],
+    "inputs": [{ "internalType": "address", "name": "_newAddress", "type": "address" }],
     "name": "updateUniswapRouterAddress",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "inputs": [
-      { "internalType": "address", "name": "_newAddress", "type": "address" }
-    ],
+    "inputs": [{ "internalType": "address", "name": "_newAddress", "type": "address" }],
     "name": "updateWETHAddress",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "inputs": [
-      { "internalType": "address", "name": "_channel", "type": "address" }
-    ],
+    "inputs": [{ "internalType": "address", "name": "_channel", "type": "address" }],
     "name": "verifyChannel",
     "outputs": [],
     "stateMutability": "nonpayable",
