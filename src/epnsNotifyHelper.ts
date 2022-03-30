@@ -56,7 +56,7 @@ export default {
         return { ...data, statusCode: status };
       })
       .catch((err) => {
-        console.log({err})
+        console.log({ err });
         const { status, message } = JSON.parse(JSON.stringify(err));
         return { statusCode: status, message: message, retry: !Boolean(status) || `${status}`.startsWith('5') };
       });
