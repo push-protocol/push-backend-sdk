@@ -4,7 +4,7 @@
   
 
 ## About
-This module is used to send notifications to  [EPNS](http://www.epns.io/)  channels easy. It Provides an abstraction layer above advanced internal EPNS notification functions.
+This module is used to send notifications to  [PUSH](http://www.epns.io/)  channels easy. It Provides an abstraction layer above advanced internal EPNS notification functions.
 
 It is written in typescript and requires node v10.0.0 or higher. Most features will work with nodejs v6.0.0 and higher but using older versions than v10.0.0 is not recommended.
 
@@ -15,7 +15,7 @@ npm install @epnsproject/backend-sdk
 ```
 
 ## Usage
-In order to use this package, [you must first have created a channel at EPNS](http://app.epns.io/).
+In order to use this package, [you must first have created a channel at PUSH](http://app.epns.io/).
 Then note the private key of the account you used to create the channel, because we would be using it in this tutorial
 ```typescript
 // Import the required packages
@@ -66,7 +66,7 @@ new EpnsSDK(
 ```
 | Parameter | Description  | Default Value| 
 |--|--|--|
-| channelKey | The private key of the account used to [create a channel on EPNS](https://app.epns.io/)  | N/A (This is the only parameter that is required) |
+| channelKey | The private key of the account used to [create a channel on PUSH Protocol](https://app.epns.io/)  | N/A (This is the only parameter that is required) |
 | communicatorContractAddress | an override parameter if you intend to use a different communicator contract from the production one| For `Main Network`:`0xb3971BCef2D791bc4027BbfedFb47319A4AAaaAa` and for `Polygon Network`: `0xb3971BCef2D791bc4027BbfedFb47319A4AAaaAa`|
 |communicatorContractABI| The ABI of the communicator contract specified| Defaults to the latest communicator contract published by EPNS|
 |channelAddress| The ethereum address used to create the channel|defaults to `ethers.utils.computeAddress(channelKey)` which is the public key of the specified private key|
